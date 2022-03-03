@@ -411,7 +411,7 @@ def main():
             # 6. Update the learning rate using the scheduler
             # 7. Zero out the gradients so that they don't accumulate between steps
             # YOUR CODE STARTS HERE
-            inputs_ids, labels = batch["input_ids"].to(device), batch["labels"].to(device)
+            inputs_ids, labels = batch["input_ids"].to(args.device), batch["labels"].to(args.device)
             logits = model(input_ids)
             _, predicted_tokens = logits.max(dim=-1)
 
