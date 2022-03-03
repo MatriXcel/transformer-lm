@@ -271,7 +271,7 @@ def main():
     # Specify vocab_size using .vocab_size attribute of the tokenizer
     # Move model to the device we use for training
     # YOUR CODE STARTS HERE
-    model = TransformerLM(args.num_layers, args.hidden, args.num_heads, args.fcn_hidden, tokenizer.vocab_size, args.max_seq_len, args.dropout)
+    model = TransformerLM(args.num_layers, args.hidden_size, args.num_heads, args.fcn_hidden, tokenizer.vocab_size, args.max_seq_len, args.dropout)
     # YOUR CODE ENDS HERE
 
     wandb.watch(model)
