@@ -211,9 +211,9 @@ def evaluate(model, eval_dataloader, device):
             # 4. Increment n_examples by the batch size, which is the same as len(labels), for example
             # Our implementation is 5 lines
             # YOUR CODE STARTS HERE
-            inputs_ids, labels = batch["input_ids"].to(device), batch["labels"].to(device)
+            input_ids, labels = batch["input_ids"].to(device), batch["labels"].to(device)
             
-            logits = model(inputs_ids)
+            logits = model(input_ids)
             _, predicted_tokens = logits.max(dim=-1)
 
             eval_loss += F.cross_entropy(predicted_tokens, labels)
@@ -411,7 +411,7 @@ def main():
             # 6. Update the learning rate using the scheduler
             # 7. Zero out the gradients so that they don't accumulate between steps
             # YOUR CODE STARTS HERE
-            inputs_ids, labels = batch["input_ids"].to(args.device), batch["labels"].to(args.device)
+            input_ids, labels = batch["input_ids"].to(args.device), batch["labels"].to(args.device)
             logits = model(input_ids)
             _, predicted_tokens = logits.max(dim=-1)
 
