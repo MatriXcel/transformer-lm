@@ -242,7 +242,7 @@ def evaluate(model, eval_dataloader, device):
 
 def main():
     args = parse_args()
-
+    print("device you're using is ", args.device)
     # Use Datsets to load wikitext corpus. This is a very relatively dataset, less than 1Gb.
     # wikitext-103-v1 is a particular version of this dataset, you can look for other versions here: https://huggingface.co/datasets/wikitext
     # See more about loading any type of standard or custom dataset (from files, python dict, pandas DataFrame, etc) at
