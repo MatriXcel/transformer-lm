@@ -370,7 +370,7 @@ def main():
     # Task 4.3: Create Optimizer
     # Use AdamW optimizer and provide learning_rate and weight_decay from args.
     # YOUR CODE STARTS HERE
-    optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
     # YOUR CODE ENDS HERE
 
     # Scheduler and math around the number of training steps.
