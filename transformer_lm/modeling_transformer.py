@@ -67,7 +67,8 @@ class TransformerEncoderLayer(nn.Module):
         # YOUR CODE STARTS HERE (our implementation is about 6 lines)
         self.self_attention = self.self_attention.to(x.device)
         self.att_layer_norm = self.att_layer_norm.to(x.device)
-
+        self.fcn = self.fcn.to(x.device)
+        
         h = self.self_attention(x)
         h = h + x
 
