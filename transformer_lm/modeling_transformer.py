@@ -215,6 +215,7 @@ class TransformerLM(nn.Module):
         # 3. Output Layer to produce logits over the classes (our vocabulary in case of language modeling)
         # YOUR CODE STARTS HERE (our implementation is 2 lines)
         self.encoder.logit_proj.to(input_ids.device)
+        self.out_proj.to(input_ids.device)
         
         encoder_embeds = self.encoder.logit_proj(self.encoder(input_ids))
         encoder_embeds = self.dropout(encoder_embeds)
