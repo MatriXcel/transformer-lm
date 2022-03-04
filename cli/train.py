@@ -420,7 +420,7 @@ def main():
             print("labels", labels.shape, labels)
             
             crossEntropyOp = torch.nn.CrossEntropyLoss()
-            loss = crossEntropyOp(max_logits, labels)
+            loss = crossEntropyOp(logits, labels)
             optimizer.zero_grad() 
 
             loss.backward()
