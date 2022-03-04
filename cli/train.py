@@ -216,7 +216,7 @@ def evaluate(model, eval_dataloader, device):
             logits = model(input_ids)
             _, predicted_tokens = logits.max(dim=-1)
 
-            eval_loss += F.cross_entropy(logits.reshape(logits.shape[0] * logits.shape[1], logits.shape[2]), labels.reshape(labels.shape[0] * labels.shape[1]))
+            total_eval_loss += F.cross_entropy(logits.reshape(logits.shape[0] * logits.shape[1], logits.shape[2]), labels.reshape(labels.shape[0] * labels.shape[1]))
 
             n_correct += int((predicted_tokens == labels).sum().item())
             n_examples += len(labels)
