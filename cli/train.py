@@ -415,12 +415,12 @@ def main():
             logits = model(input_ids)
             max_logits, predicted_tokens = logits.max(dim=-1)
 
-            print("pred tokens", predicted_tokens.shape, predicted_tokens)
+           # print("pred tokens", predicted_tokens.shape, predicted_tokens)
 
-            print("labels", labels.shape, labels)
+            #print("labels", labels.shape, labels)
             
             crossEntropyOp = torch.nn.CrossEntropyLoss()
-            loss = crossEntropyOp(logits, labels)
+            loss = crossEntropyOp(logits.reshape(logits.shape[0] * logits.shape[1], logits.shape[2]), labels.reshape(labels.shape[0] * labels.shape[1]))
             optimizer.zero_grad() 
 
             loss.backward()
