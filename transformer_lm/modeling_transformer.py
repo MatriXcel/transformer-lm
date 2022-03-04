@@ -141,6 +141,7 @@ class TransformerEncoder(nn.Module):
         # and add them to the input tensor
         # YOUR CODE STARTS HERE (our implementation is about 3 lines)
         seq_range = torch.arange(1, seq_len+1)
+        seq_range.to(sequence_tensor.device)
         self.positional_emb.to(sequence_tensor.device)
         position_emb = self.positional_emb(seq_range)
         position_emb.to(sequence_tensor.device)
