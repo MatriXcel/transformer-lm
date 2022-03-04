@@ -420,13 +420,14 @@ def main():
 
             #print("labels", labels.shape, labels)
             
-            crossEntropyOp = torch.nn.CrossEntropyLoss()
-            loss = crossEntropyOp(logits.reshape(logits.shape[0] * logits.shape[1], logits.shape[2]), labels.reshape(labels.shape[0] * labels.shape[1]))
+            loss = F.cross_entropy(logits.reshape(logits.shape[0] * logits.shape[1], logits.shape[2]), labels.reshape(labels.shape[0] * labels.shape[1]))
+            
             optimizer.zero_grad() 
 
             loss.backward()
 
             optimizer.step()
+            lr_scheduler.step()
             # YOUR CODE ENDS HERE
 
             progress_bar.update(1)
