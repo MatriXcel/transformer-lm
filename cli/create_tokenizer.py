@@ -57,9 +57,9 @@ def main():
 
     # YOUR CODE STARTS HERE (our implementation is about 6 lines)
 
-    tokenizer = Tokenizer(BPE(special_tokens=["[UNK]", "[PAD]"]))
+    tokenizer = Tokenizer(args.vocab_size, BPE(special_tokens=["[UNK]", "[PAD]"]))
     tokenizer_trainer = BpeTrainer(special_tokens=["[UNK]", "[PAD]"])
-    tokenizer.pre_tokenizer = tokenizer.pre_tokenizer = Whitespace()
+    tokenizer.pre_tokenizer = Whitespace()
 
     iterator = (item["text"] for item in raw_datasets["train"])
     tokenizer.train_from_iterator(iterator, tokenizer_trainer, len(raw_datasets["train"]))
