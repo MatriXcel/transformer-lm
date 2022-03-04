@@ -153,12 +153,12 @@ class MultiHeadSelfAttention(nn.Module):
         v = self.v(x) #[batch_size, seq_len, hidden_dim] 
 
         
-        batch_combined_k = k.transpose(1, 2).reshape((bs, 3, self.head_size, seq)).transpose(2, 3)\
+        batch_combined_k = k.transpose(1, 2).reshape((bs, self.num_heads, self.head_size, seq)).transpose(2, 3)\
         .reshape((bs * self.num_heads, seq, self.head_size)) #[batch_size * num_heads, seq_len, head_size]
 
-        batch_combined_q =  q.transpose(1, 2).reshape((bs, 3, self.head_size, seq)).transpose(2, 3)\
+        batch_combined_q =  q.transpose(1, 2).reshape((bs, self.num_heads, self.head_size, seq)).transpose(2, 3)\
         .reshape((bs * self.num_heads, seq, self.head_size)) #[batch_size * num_heads, seq_len, head_size]
-        batch_combined_v =  v.transpose(1, 2).reshape((bs, 3, self.head_size, seq)).transpose(2, 3)\
+        batch_combined_v =  v.transpose(1, 2).reshape((bs, self.num_heads, self.head_size, seq)).transpose(2, 3)\
             .reshape((bs * self.num_heads, seq, self.head_size)) #[batch_size * num_heads, seq_len, head_size]
         
         
