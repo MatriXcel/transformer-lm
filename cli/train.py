@@ -413,13 +413,14 @@ def main():
             # YOUR CODE STARTS HERE
             input_ids, labels = batch["input_ids"].to(args.device), batch["labels"].to(args.device)
             logits = model(input_ids)
-            _, predicted_tokens = logits.max(dim=-1)
+            max_logits, predicted_tokens = logits.max(dim=-1)
 
             print("pred tokens", predicted_tokens.shape, predicted_tokens)
+
             print("labels", labels.shape, labels)
             
             crossEntropyOp = torch.nn.CrossEntropyLoss()
-            loss = crossEntropyOp(predicted_tokens.to(dtype=torch.long), labels)
+            loss = crossEntropyOp(max_logits, labels)
             optimizer.zero_grad() 
 
             loss.backward()
