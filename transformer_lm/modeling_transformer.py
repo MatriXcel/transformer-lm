@@ -218,9 +218,12 @@ class TransformerLM(nn.Module):
         self.out_proj.to(input_ids.device)
 
         encoder_embeds = self.encoder.logit_proj(self.encoder(input_ids))
+        print("encoder embeds shape", encoder_embeds.shape)
+
         encoder_embeds = self.dropout(encoder_embeds)
 
         logits = self.out_proj(encoder_embeds)
+        print("logits shape", logits.shape)
         # YOUR CODE ENDS HERE
         return logits
 
