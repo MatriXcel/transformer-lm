@@ -216,7 +216,7 @@ def evaluate(model, eval_dataloader, device):
             logits = model(input_ids)
             _, predicted_tokens = logits.max(dim=-1)
 
-            eval_loss += F.cross_entropy(predicted_tokens, labels)
+            eval_loss += F.cross_entropy(logits.reshape(logits.shape[0] * logits.shape[1], logits.shape[2]), labels.reshape(labels.shape[0] * labels.shape[1]))
 
             n_correct += int((predicted_tokens == labels).sum().item())
             n_examples += len(labels)
@@ -271,8 +271,7 @@ def main():
     # Specify vocab_size using .vocab_size attribute of the tokenizer
     # Move model to the device we use for training
     # YOUR CODE STARTS HERE
-    print("my vocab size is ", tokenizer.vocab_size)
-    print("##############################################")
+
     model = TransformerLM(args.num_layers, args.hidden_size, args.num_heads, args.fcn_hidden, tokenizer.vocab_size, args.max_seq_length, args.dropout_rate)
     # YOUR CODE ENDS HERE
 
