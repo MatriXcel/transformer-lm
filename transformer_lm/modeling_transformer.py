@@ -65,8 +65,12 @@ class TransformerEncoderLayer(nn.Module):
         # 7. LayerNorm
         # Note : Please write shape of the tensor for each line of code
         # YOUR CODE STARTS HERE (our implementation is about 6 lines)
+        self.self_attention = self.self_attention.to(x.device)
+        self.att_layer_norm = self.att_layer_norm.to(x.device)
+
         h = self.self_attention(x)
         h = h + x
+
         h = self.att_layer_norm(h)
 
         h2 = self.fcn(h)
@@ -174,6 +178,7 @@ class TransformerEncoder(nn.Module):
         
         for i, l in enumerate(self.encoder_layers):
             output = l(embeds_with_pos)
+            #.to(input_ids.device)
 
         # YOUR CODE ENDS HERE
         return output
