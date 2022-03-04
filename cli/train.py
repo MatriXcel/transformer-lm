@@ -415,6 +415,8 @@ def main():
             logits = model(input_ids)
             _, predicted_tokens = logits.max(dim=-1)
 
+            print("pred tokens", predicted_tokens)
+            print("labels", labels)
             loss = F.cross_entropy(predicted_tokens, labels)
             optimizer.zero_grad() 
 
