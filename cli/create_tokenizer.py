@@ -57,7 +57,7 @@ def main():
 
     # YOUR CODE STARTS HERE (our implementation is about 6 lines)
 
-    tokenizer = Tokenizer(BPE(special_tokens=["[UNK]", "[PAD]"]))
+    tokenizer = Tokenizer(BPE(special_tokens=["[UNK]", "[PAD]"]), max_model_length=args.vocab_size)
     tokenizer_trainer = BpeTrainer(special_tokens=["[UNK]", "[PAD]"])
     tokenizer.pre_tokenizer = Whitespace()
 
