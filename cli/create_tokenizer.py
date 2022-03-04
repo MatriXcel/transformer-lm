@@ -57,7 +57,7 @@ def main():
 
     # YOUR CODE STARTS HERE (our implementation is about 6 lines)
 
-    tokenizer = Tokenizer(args.vocab_size, BPE(special_tokens=["[UNK]", "[PAD]"]))
+    tokenizer = Tokenizer(BPE(special_tokens=["[UNK]", "[PAD]"]))
     tokenizer_trainer = BpeTrainer(special_tokens=["[UNK]", "[PAD]"])
     tokenizer.pre_tokenizer = Whitespace()
 
@@ -66,7 +66,7 @@ def main():
     # YOUR CODE ENDS HERE
 
     # wrap the tokenizer to make it usable in HuggingFace Transformers
-    tokenizer = transformers.PreTrainedTokenizerFast(tokenizer_object=tokenizer)
+    tokenizer = transformers.PreTrainedTokenizerFast(args.vocab_size, tokenizer_object=tokenizer)
     logger.info(f"Saving tokenizer to {args.save_dir}")
     tokenizer.save_pretrained(args.save_dir)
 
