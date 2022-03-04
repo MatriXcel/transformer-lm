@@ -418,7 +418,8 @@ def main():
             print("pred tokens", predicted_tokens.shape, predicted_tokens)
             print("labels", labels.shape, labels)
             
-            loss = F.cross_entropy(predicted_tokens.to(dtype=torch.long), labels)
+            crossEntropyOp = torch.nn.CrossEntropyLoss()
+            loss = crossEntropyOp(predicted_tokens.to(dtype=torch.long), labels)
             optimizer.zero_grad() 
 
             loss.backward()
