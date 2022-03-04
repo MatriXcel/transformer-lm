@@ -164,7 +164,7 @@ class TransformerEncoder(nn.Module):
         # 3. Transformer Encoder Layers
         # NOTE: Please write shape of the tensor for each line of code
         # YOUR CODE STARTS HERE(our implementation is about 4 lines)
-        #self.encoder_emb.to(input_ids.device)
+        self.encoder_emb.to(input_ids.device)
         embeds = self.encoder_emb(input_ids)
         embeds.to(input_ids.device)
         embeds_with_pos = self._add_positions(embeds)
