@@ -78,7 +78,7 @@ class TransformerEncoderLayer(nn.Module):
         h2 = h2 + h
         h2 = self.att_layer_norm(h2)
 
-
+        print("h2 shape is ", h2.shape)
         # YOUR CODE ENDS HERE
         return h2
 
@@ -216,7 +216,7 @@ class TransformerLM(nn.Module):
         # YOUR CODE STARTS HERE (our implementation is 2 lines)
         self.encoder.logit_proj.to(input_ids.device)
         self.out_proj.to(input_ids.device)
-        
+
         encoder_embeds = self.encoder.logit_proj(self.encoder(input_ids))
         encoder_embeds = self.dropout(encoder_embeds)
 
