@@ -68,7 +68,7 @@ class TransformerEncoderLayer(nn.Module):
         self.self_attention = self.self_attention.to(x.device)
         self.att_layer_norm = self.att_layer_norm.to(x.device)
         self.fcn = self.fcn.to(x.device)
-        
+
         h = self.self_attention(x)
         h = h + x
 
@@ -214,6 +214,8 @@ class TransformerLM(nn.Module):
         # 2. Dropout
         # 3. Output Layer to produce logits over the classes (our vocabulary in case of language modeling)
         # YOUR CODE STARTS HERE (our implementation is 2 lines)
+        self.encoder.logit_proj.to(input_ids.device)
+        
         encoder_embeds = self.encoder.logit_proj(self.encoder(input_ids))
         encoder_embeds = self.dropout(encoder_embeds)
 
