@@ -219,7 +219,7 @@ def evaluate(model, eval_dataloader, device):
             total_eval_loss += F.cross_entropy(logits.reshape(logits.shape[0] * logits.shape[1], logits.shape[2]), labels.reshape(labels.shape[0] * labels.shape[1]))
 
             n_correct += int((predicted_tokens == labels).sum().item())
-            n_examples += len(labels)
+            n_examples += len(labels.flatten())
             # YOUR CODE ENDS HERE
 
     eval_loss = (total_eval_loss / len(eval_dataloader)).item()
