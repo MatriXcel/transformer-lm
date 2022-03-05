@@ -105,7 +105,7 @@ class MultiHeadSelfAttention(nn.Module):
         self.causal = causal  # causal masking
 
     def forward(self, x, return_attention=False):
-
+        # print("yes")
         """Computes [Softmax(x Q_1 @ x K_1^T) @ x V_1 : ... : Softmax(x Q_heads @ x K_heads^T) @ x V_heads] @ U
 
         or in more details:
@@ -142,28 +142,21 @@ class MultiHeadSelfAttention(nn.Module):
         # This comment explains how each operation is changing the shape of the tensor 'a' before it finally gets assigned to 'a' again.
         # This is just an example and does not suggest if these operations are used for this task.
         # YOUR CODE STARTS HERE (Our implementation is in 3 lines, one for each for k, q and v)
+        k, q, v = self.k(x), self.q(x), self.v(x)  # [batch, seq, hidden]
+
+        # [b, s, h] -> [b, h, s] -> [b * heads, h / heads, s] -> [b * heads, s, h / heads]
+        k = k.transpose(1, 2).reshape(-1, self.head_size, seq).transpose(1, 2).contiguous()  # [batch * num_heads, seq, hidden / num_heads]
+        q = q.transpose(1, 2).reshape(-1, self.head_size, seq).transpose(1, 2).contiguous()
+        v = v.transpose(1, 2).reshape(-1, self.head_size, seq).transpose(1, 2).contiguous()
 
         # YOUR CODE ENDS HERE
 
         # TASK 1.3 (1 point)
         # 1. Compute scores (query key product) and scale them
         # YOUR CODE STARTS HERE  (our implementation is in 1 line)
-
-        k = self.k(x) #[batch_size, seq_len, hidden_dim] 
-        q = self.q(x) #[batch_size, seq_len, hidden_dim] 
-        v = self.v(x) #[batch_size, seq_len, hidden_dim] 
-
         
-        batch_combined_k = k.transpose(1, 2).reshape((bs, self.num_heads, self.head_size, seq)).transpose(2, 3)\
-        .reshape((bs * self.num_heads, seq, self.head_size)) #[batch_size * num_heads, seq_len, head_size]
-
-        batch_combined_q =  q.transpose(1, 2).reshape((bs, self.num_heads, self.head_size, seq)).transpose(2, 3)\
-        .reshape((bs * self.num_heads, seq, self.head_size)) #[batch_size * num_heads, seq_len, head_size]
-        batch_combined_v =  v.transpose(1, 2).reshape((bs, self.num_heads, self.head_size, seq)).transpose(2, 3)\
-            .reshape((bs * self.num_heads, seq, self.head_size)) #[batch_size * num_heads, seq_len, head_size]
-        
-        
-        scores = batch_combined_q @ batch_combined_k.transpose(1,2) #[batch_size * num_heads, seq_len, seq_len]
+        scores = q @ k.transpose(-1, -2) / self.scale  # [batch * num_heads, seq, seq]
+       
         # YOUR CODE ENDS HERE
 
         if self.causal:
@@ -177,11 +170,13 @@ class MultiHeadSelfAttention(nn.Module):
             #  - torch.triu
             #  - .masked_fill_
             #
-            casual_mask = (torch.triu(scores, diagonal=1) != 0)
-            casual_mask.to(scores.device)
+            # NOTE : Please write shape of the tensor for each line of code
+            # YOUR CODE STARTS HERE (Our implementation is in 2 lines)
 
-            scores = scores.masked_fill(casual_mask, -torch.inf)
-            # YOUR CODE ENDS HERE
+            causal_mask = torch.triu(torch.ones(seq, seq, dtype=torch.bool, device=scores.device), diagonal=1)
+            scores.masked_fill_(causal_mask.bool().unsqueeze(0), float("-inf"))
+
+             # YOUR CODE ENDS HERE
 
         # Task 1.5 (2 point)
         # Compute probability (probs) and attention (att)
@@ -197,21 +192,126 @@ class MultiHeadSelfAttention(nn.Module):
         #
         # YOUR CODE STARTS HERE (can be implemented in 4 lines)
 
-        softmaxOp = torch.nn.Softmax(dim=2) #[batch_size * num_heads, seq_len, seq_len]
-        probs = softmaxOp(scores / self.scale) #[batch_size * num_heads, seq_len, seq_len]
+        probs = torch.softmax(scores, dim=-1)  # [batch * num_heads, seq, seq]
+        probs = self.dropout(probs)  # [batch * num_heads, seq, seq]
+        att = probs @ v  # [batch * num_heads, seq, hidden / num_heads]
 
-        probs = self.dropout(probs) #[batch_size * num_heads, seq_len, seq_len]
-        attention = probs @ batch_combined_v #[batch_size * num_heads, seq_len, head_size]
-
-        attention = attention.reshape((bs, self.num_heads, seq, self.head_size)).transpose(1, 2)\
-        .reshape((bs, seq, self.head_size * self.num_heads))  #[batch_size, seq_len, hidden_dim]
-
-        att = self.mix(attention) #[batch_size, seq_len, hidden_dim]
+        # [b * heads, s, h / heads] -> [b * heads, h / heads, s] -> [b, h, s] -> [b, s, h]
+        att = att.transpose(1, 2).reshape(bs, -1, seq).transpose(1, 2).contiguous()
         
+        att = self.mix(att)
         # YOUR CODE ENDS HERE
-
 
         if return_attention:
             return att, probs
 
         return att
+        # """Computes [Softmax(x Q_1 @ x K_1^T) @ x V_1 : ... : Softmax(x Q_heads @ x K_heads^T) @ x V_heads] @ U
+
+        # or in more details:
+        # [SelfAttention_1(x) : ... : SelfAttention_h(x)] @ U
+
+        # where SelfAttention(x) = Softmax(x Q @ x K^T) @ x V
+        # and [:] is a concatenation operation.
+
+        # Args:
+        #     x: FloatTensor[batch_size, seq_len, input_size]
+
+        # Returns:
+        #     FloatTensor[batch_size, seq_len, hidden]
+        # """
+        # bs, seq, _ = x.shape
+ 
+        # # Task 1.2  (1 point)
+        # # 1. Compute key, query and value matrices from your input x using self.k, self.q and self.v
+        # # 1. Split them into multiple heads for multihead attention.
+        # # This can be achieves as a sequence of transpose and reshape operations.
+        # # Hint: Your target shape is [batch * num_heads, seq, hidden / num_heads]
+        # # 
+        # # NOTE: notice that reshape and transpose operations are different,
+        # # for example, given a tensor of shape [M, N] .reshape (N, M) and .transpose (1, 0)
+        # # will return you **different** tensors even thought their shapes are the same.
+        # # https://jdhao.github.io/2019/07/10/pytorch_view_reshape_transpose_permute/
+        # #
+        # # Please write how the shape of the tensors are changing after each operation
+        # # for example:
+        # #        suppose 'a' is a tensor of shape [batch_size, input_size] and we apply following operation on it
+        # #        a = a.unsqueeze(1).transpose() # shape [batch_size, input_size, 1] 
+        # #        # 'a' [batch_size, input_size] -> unsqueeze [batch_size, 1, input_size] -> transpose [batch_size, input_size, 1]
+        # #
+        # # This comment explains how each operation is changing the shape of the tensor 'a' before it finally gets assigned to 'a' again.
+        # # This is just an example and does not suggest if these operations are used for this task.
+        # # YOUR CODE STARTS HERE (Our implementation is in 3 lines, one for each for k, q and v)
+
+        # # YOUR CODE ENDS HERE
+
+        # # TASK 1.3 (1 point)
+        # # 1. Compute scores (query key product) and scale them
+        # # YOUR CODE STARTS HERE  (our implementation is in 1 line)
+
+        # k = self.k(x) #[batch_size, seq_len, hidden_dim] 
+        # q = self.q(x) #[batch_size, seq_len, hidden_dim] 
+        # v = self.v(x) #[batch_size, seq_len, hidden_dim] 
+
+        
+        # batch_combined_k = k.transpose(1, 2).reshape((bs, self.num_heads, self.head_size, seq)).transpose(2, 3)\
+        # .reshape((bs * self.num_heads, seq, self.head_size)) #[batch_size * num_heads, seq_len, head_size]
+
+        # batch_combined_q =  q.transpose(1, 2).reshape((bs, self.num_heads, self.head_size, seq)).transpose(2, 3)\
+        # .reshape((bs * self.num_heads, seq, self.head_size)) #[batch_size * num_heads, seq_len, head_size]
+        # batch_combined_v =  v.transpose(1, 2).reshape((bs, self.num_heads, self.head_size, seq)).transpose(2, 3)\
+        #     .reshape((bs * self.num_heads, seq, self.head_size)) #[batch_size * num_heads, seq_len, head_size]
+        
+        
+        # scores = batch_combined_q @ batch_combined_k.transpose(1,2) #[batch_size * num_heads, seq_len, seq_len]
+        # # YOUR CODE ENDS HERE
+
+        # if self.causal:
+        #     # Task 1.4 (2 points)
+        #     # Apply casual mask to the scores
+        #     # 1. Create a casual_mask that does not allow queries to look to the future keys
+        #     # Specify the device of the causal_mask tensor to be the same as the scores.device
+        #     # 2. Apply this casual mask on scores, fill with '-inf' where the mask is present.
+        #     # 
+        #     # You will find the following functions useful:
+        #     #  - torch.triu
+        #     #  - .masked_fill_
+        #     #
+        #     casual_mask = (torch.triu(scores, diagonal=1) != 0)
+        #     casual_mask.to(scores.device)
+
+        #     scores = scores.masked_fill(casual_mask, -torch.inf)
+        #     # YOUR CODE ENDS HERE
+
+        # # Task 1.5 (2 point)
+        # # Compute probability (probs) and attention (att)
+        # # 1. Compute probabilities using scores, name them `probs`
+        # # 2. Apply dropout to the computed probabilities (a common place to put dropout in)
+        # # 3. Compute attention using probabilities
+        # # 4. Apply a number of matrix transformation on attention to change its dimenion to [batch, seq, hidden] (Our implmentation has four operations)
+        # # 5. Mix the attentions using self.mix, name the output `att`
+        # # Please write shape of the tensor for each line of code
+        # # 
+        # # NOTE: correct shapes do not guarantee correctness of the code.
+        # # You should understand how the reshapes and transposes are changing the elements of the tensor.
+        # #
+        # # YOUR CODE STARTS HERE (can be implemented in 4 lines)
+
+        # softmaxOp = torch.nn.Softmax(dim=2) #[batch_size * num_heads, seq_len, seq_len]
+        # probs = softmaxOp(scores / self.scale) #[batch_size * num_heads, seq_len, seq_len]
+
+        # probs = self.dropout(probs) #[batch_size * num_heads, seq_len, seq_len]
+        # attention = probs @ batch_combined_v #[batch_size * num_heads, seq_len, head_size]
+
+        # attention = attention.reshape((bs, self.num_heads, seq, self.head_size)).transpose(1, 2)\
+        # .reshape((bs, seq, self.head_size * self.num_heads))  #[batch_size, seq_len, hidden_dim]
+
+        # att = self.mix(attention) #[batch_size, seq_len, hidden_dim]
+        
+        # # YOUR CODE ENDS HERE
+
+
+        # if return_attention:
+        #     return att, probs
+
+        # return att
