@@ -69,14 +69,14 @@ class TransformerEncoderLayer(nn.Module):
         self.att_layer_norm = self.att_layer_norm.to(x.device)
         self.fcn = self.fcn.to(x.device)
 
-        h = self.self_attention(x)
+        h = self.self_attention(x) #[batch_size, seq_len, hidden]
         h = h + x
 
-        h = self.att_layer_norm(h)
+        h = self.att_layer_norm(h) #[batch_size, seq_len, hidden]
 
-        h2 = self.fcn(h)
-        h2 = h2 + h
-        h2 = self.att_layer_norm(h2)
+        h2 = self.fcn(h)    #[batch_size, seq_len, hidden]
+        h2 = h2 + h         #[batch_size, seq_len, hidden]
+        h2 = self.att_layer_norm(h2)    #[batch_size, seq_len, hidden]
 
         # YOUR CODE ENDS HERE
         return h2
@@ -170,15 +170,16 @@ class TransformerEncoder(nn.Module):
         # 3. Transformer Encoder Layers
         # NOTE: Please write shape of the tensor for each line of code
         # YOUR CODE STARTS HERE(our implementation is about 4 lines)
-        self.encoder_emb = self.encoder_emb.to(input_ids.device)
-        embeds = self.encoder_emb(input_ids)
+        self.encoder_emb = self.encoder_emb.to(input_ids.device) 
+        embeds = self.encoder_emb(input_ids) #[batch_size, seq_len, hidden]
         embed = embeds.to(input_ids.device)
-        embeds_with_pos = self._add_positions(embeds)
+        embeds_with_pos = self._add_positions(embeds) #[batch_size, seq_len, hidden]
         
-        
+        output = embeds_with_pos
+
         for i, l in enumerate(self.encoder_layers):
-            output = l(embeds_with_pos)
-            #.to(input_ids.device)
+            output = l(output) #[batch_size, seq_len, hidden]
+
 
         # YOUR CODE ENDS HERE
         return output
